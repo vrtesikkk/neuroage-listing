@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Double Decision Assessment</title>
+</head>
+<body>
+    <div class="background-blur-bg"></div>
+    <!-- DOUBLE DECISION START -->
+    <!-- Double Decision Game -->
+    <div id="doubleDecision" class="game-container max-w-2xl w-full mx-auto px-4"> <!-- [DD] -->
+
+        <!-- Header -->
+         <img src="img/neuroage-logo.png" alt="NeuroAge Logo" style="height:56px;max-width:100%;display:block;margin:0 auto;" />
+        <div class="text-center mb-4">
+            <a href="index.html" class="back-to-menu-btn mb-4" style="display: inline-block; text-decoration: none;">
+                <span class="back-arrow">←</span> Back to Menu
+            </a>
+            <h2 class="text-2xl font-bold neuroage-text-primary">Double Decision Assessment</h2>
+        </div>
+        
+        <!-- Start Screen -->
+        <div id="dd-startScreen" class="neuroage-card rounded-lg p-8 text-center mb-4"> <!-- [DD] -->
+            <h1 class="text-3xl font-bold neuroage-text-primary mb-4">Double Decision Assessment</h1>
+            <p class="text-lg text-gray-700 mb-4 font-medium">Test your attention and working memory</p>
+            <div class="max-w-xl mx-auto mb-6">
+                <p class="text-sm text-gray-600 leading-relaxed mb-3">
+                    This assessment measures your ability to process multiple pieces of information simultaneously.
+                </p>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 text-left rounded">
+                    <p class="text-sm text-gray-700">
+                        <strong>Instructions:</strong> Watch the center ufo and the moon that appears around it. After they disappear, choose which object was in the center and click where the moon appeared.
+                    </p>
+                </div>
+            </div>
+            <button id="dd-startBtn" class="neuroage-primary hover:neuroage-primary-dark text-white font-semibold py-3 px-8 rounded-lg text-base transition-all duration-200 shadow-md hover:shadow-lg"> <!-- [DD] -->
+                Begin Assessment
+            </button>
+        </div>
+
+        <!-- Game Area -->
+        <div class="neuroage-card rounded-lg p-4 md:p-6 relative hidden" id="dd-gameArea"> <!-- [DD] -->
+            <!-- Progress Bar -->
+            <div class="neuroage-card rounded-lg p-4 mb-4">
+                <div class="progress-bar-container">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-semibold text-gray-700">Training Progress</span>
+                        <span class="text-sm font-bold neuroage-text-primary" id="dd-progressText">0%</span> <!-- [DD] -->
+                    </div>
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" id="dd-progressBar"></div> <!-- [DD] -->
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1 text-center">
+                        <span id="dd-progressDetails">Round 0 of 10</span> <!-- [DD] -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score Display -->
+            <div class="neuroage-card rounded-lg p-4 mb-4">
+                <div class="flex justify-between items-center flex-wrap gap-4">
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500 font-medium">Round</p>
+                        <p class="text-xl font-bold neuroage-text-primary" id="dd-roundCounter">1</p> <!-- [DD] -->
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500 font-medium">Attempts</p>
+                        <p class="text-xl font-bold neuroage-text-primary" id="dd-attemptsCounter">0</p> <!-- [DD] -->
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500 font-medium">Accuracy</p>
+                        <p class="text-xl font-bold neuroage-text-primary" id="dd-accuracyCounter">0%</p> <!-- [DD] -->
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500 font-medium">Difficulty</p>
+                        <p class="text-xl font-bold neuroage-text-primary" id="dd-difficultyDisplay">500ms</p> <!-- [DD] -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game Canvas Container -->
+            <div class="dd-game-canvas-container"> <!-- [DD] -->
+                <svg id="dd-sectorSvg" viewBox="0 0 1000 1000" class="absolute inset-0 w-full h-full z-0"> <!-- [DD] -->
+                    <g id="dd-sectors"></g> <!-- [DD] -->
+                </svg>
+                <!-- Moon Display -->
+                <img id="dd-moon" src="img/moon.png" alt="Moon" class="dd-moon-size moon-hidden pointer-events-none z-5"> <!-- [DD] -->
+                <!-- Center Object Display -->
+                <div class="dd-center-object-container absolute pointer-events-none z-10"> <!-- [DD] -->
+                    <div id="dd-centerObject" class="flex items-center justify-center"> <!-- [DD] -->
+                        <img id="dd-centerObjectImg" src="" alt="Center Object" class="dd-center-object-size object-contain hidden"> <!-- [DD] -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Center Object Choice Buttons -->
+            <div class="mt-4">
+                <p class="text-center text-base font-semibold text-aliceblue-700 text-outline-black mb-3">Which object appeared in the center?</p> <!-- [DD] -->
+                <div class="flex justify-center gap-3 flex-wrap"> <!-- [DD] -->
+                    <button class="dd-choice-btn" data-choice="img/ufo1.png"> <!-- [DD] -->
+                        <img src="img/ufo1.png" alt="UFO 1" class="dd-choice-btn-img object-contain"> <!-- [DD] -->
+                    </button>
+                    <button class="dd-choice-btn" data-choice="img/ufo2.png"> <!-- [DD] -->
+                        <img src="img/ufo2.png" alt="UFO 2" class="dd-choice-btn-img object-contain"> <!-- [DD] -->
+                    </button>
+                </div>
+            </div>
+
+            <!-- Click Prompt -->
+            <div class="mt-4 text-center">
+                <p class="text-base font-semibold text-aliceblue-700 text-outline-black" id="dd-clickPrompt">Click where the moon appeared</p> <!-- [DD] -->
+            </div>
+
+            <!-- Restart Button -->
+            <div class="mt-4 text-center">
+                <button id="dd-gameRestartBtn" class="bg-gray-500 hover:bg-gray-600 text-white text-outline-black font-bold py-2 px-6 rounded-lg text-sm transition-all duration-200 shadow-md hover:shadow-lg"> <!-- [DD] -->
+                    Restart Game
+                </button>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div id="dd-confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"> <!-- [DD] -->
+            <div class="neuroage-card rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 text-center">
+                <h2 class="text-2xl font-bold neuroage-text-primary mb-4">Confirm Restart</h2>
+                <p class="text-gray-700 mb-6">Are you sure you want to restart? Your current progress will be lost.</p>
+                <div class="flex gap-3 justify-center">
+                    <button id="dd-confirmYes" class="neuroage-primary hover:neuroage-primary-dark text-white font-semibold py-3 px-6 rounded-lg text-base transition-all duration-200 shadow-md hover:shadow-lg"> <!-- [DD] -->
+                        Yes, Restart
+                    </button>
+                    <button id="dd-confirmNo" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg text-base transition-all duration-200"> <!-- [DD] -->
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="dd-gameOverScreen" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"> <!-- [DD] -->
+            <div class="neuroage-card rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 text-center">
+                <h2 class="text-3xl font-bold neuroage-text-primary mb-4">Assessment Complete</h2>
+                <div class="mb-6">
+                    <p class="text-lg text-gray-700 mb-2">Final Accuracy: <span class="font-bold neuroage-text-primary" id="dd-finalAccuracy">0%</span></p> <!-- [DD] -->
+                    <p class="text-lg text-gray-700">Total Attempts: <span class="font-bold neuroage-text-primary" id="dd-finalAttempts">0</span></p> <!-- [DD] -->
+                </div>
+                <div class="flex gap-3 justify-center">
+                    <a href="index.html" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg text-base transition-all duration-200" style="display:inline-block;text-decoration:none;">Main Menu</a>
+                </div>
+                <div class="mt-6 text-center">
+                    <p class="mb-4 text-base font-medium">Register on our website to gain access to additional cognitive training games.</p>
+                    <a href="https://www.neuroagetx.com/" target="_blank" rel="noopener" class="neuroage-primary hover:neuroage-primary-dark text-white font-semibold py-3 px-8 rounded-lg text-base transition-all duration-200 shadow-md hover:shadow-lg" style="text-decoration:none;display:inline-block;">Register Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- DOUBLE DECISION END -->
+
+
+
+
+<script src="script.js"></script>
+<script>
+    if (window.initializeGame) window.initializeGame();
+</script>
+</body>
+
+
+</html>

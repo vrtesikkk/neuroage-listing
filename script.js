@@ -1,5 +1,3 @@
-
-
 // ============================================================================
 // DOUBLE DECISION GAME - Wrapped in IIFE to prevent global scope conflicts
 // ============================================================================
@@ -39,70 +37,19 @@ if (typeof window !== 'undefined') {
         }
     };
 }
-'use strict';
-
-// =============================
-// SECTOR-INDEX-BASED PERIPHERAL OBJECT SPAWNING SYSTEM
-// =============================
-
-// Spawns peripheral objects for the round based on difficulty
-// Returns an array of objects: { type: 'correct'|'fake', img: string, sectorIndex: number }
-function spawnPeripheralObjects(difficulty) {
-    const sectors = Array.from({length: NUM_SECTORS}, (_, i) => i);
-    // Shuffle sector indices
-    for (let i = sectors.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [sectors[i], sectors[j]] = [sectors[j], sectors[i]];
-    }
-    const correctImg = ACTIVE_THEME.peripheralObject;
-    const fakeImgs = ACTIVE_THEME.fakePeripheralObjects || [];
-    let objects = [];
-    // Always 1 correct
-    objects.push({ type: 'correct', img: correctImg, sectorIndex: sectors[0] });
-    if (difficulty === 'medium') {
-        // 3 incorrect
-        for (let i = 1; i <= 3; i++) {
-            objects.push({ type: 'fake', img: fakeImgs[Math.floor(Math.random() * fakeImgs.length)], sectorIndex: sectors[i] });
-        }
-    } else if (difficulty === 'hard') {
-        // 7 incorrect
-        for (let i = 1; i < NUM_SECTORS; i++) {
-            objects.push({ type: 'fake', img: fakeImgs[Math.floor(Math.random() * fakeImgs.length)], sectorIndex: sectors[i] });
-        }
-    }
-    return objects;
-}
-
-// Returns {left, top, transform} for a given sectorIndex (0..NUM_SECTORS-1)
-function getPositionFromSector(sectorIndex) {
-    const step = (2 * Math.PI) / NUM_SECTORS;
-    const cx = 50, cy = 50, r = 13;
-    const angle = (sectorIndex + 0.5) * step - Math.PI / 2;
-    const x = cx + r * Math.cos(angle);
-    const y = cy + r * Math.sin(angle);
-    return {
-        left: `${x}%`,
-        top: `${y}%`,
-        transform: 'translate(-50%, -50%)'
-    };
-}
-
-// Returns true if the sector contains at least one correct object
-function isSectorCorrect(objects, sectorIndex) {
-    return objects.some(obj => obj.sectorIndex === sectorIndex && obj.type === 'correct');
-}
-'use strict';
 
 // ============================================================================
 // GAME CONFIGURATION - Easy to adjust values
 // ============================================================================
 
-// Number of peripheral positions (currently 8)
-const NUM_PERIPHERAL_POSITIONS = 8;
+// Number of sectors (8 triangular sectors)
+const NUM_SECTORS = 8;
 
+// Spawn zone configuration
+const ZONE_RADIUS = 16; // Distance of square zone center from circle center
+const ZONE_SIZE = 6;    // Size of spawn square (in percentage)
 
 // Object types for center and peripheral display
-// Now includes correct and fake peripheral objects for each theme
 const THEMES = {
     space: {
         centerObjects: ['img/ufo1.png', 'img/ufo2.png'],
@@ -131,8 +78,6 @@ const THEMES = {
 };
 
 let ACTIVE_THEME = THEMES.space; // Default theme
-
-
 
 // Initial display time in milliseconds (starts at easiest, decreases each round)
 const INITIAL_DISPLAY_TIME = 500;
@@ -164,7 +109,6 @@ let gameState = {
     waitingForInput: false,
     selectedDifficulty: 'easy' // default, can be changed by user
 };
-
 
 // ============================================================================
 // DOM ELEMENTS
@@ -213,7 +157,119 @@ if (startBtn) {
     startBtn.classList.add('opacity-50', 'pointer-events-none');
 }
 
-let NUM_SECTORS = 8;
+// =============================
+// SECTOR-INDEX-BASED PERIPHERAL OBJECT SPAWNING SYSTEM
+// =============================
+
+// Spawns peripheral objects for the round based on difficulty
+// Returns an array of objects: { type: 'correct'|'fake', img: string, sectorIndex: number }
+function spawnPeripheralObjects(difficulty) {
+    const sectors = Array.from({length: NUM_SECTORS}, (_, i) => i);
+    // Shuffle sector indices
+    for (let i = sectors.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [sectors[i], sectors[j]] = [sectors[j], sectors[i]];
+    }
+    const correctImg = ACTIVE_THEME.peripheralObject;
+    const fakeImgs = ACTIVE_THEME.fakePeripheralObjects || [];
+    let objects = [];
+    // Always 1 correct
+    objects.push({ type: 'correct', img: correctImg, sectorIndex: sectors[0] });
+    if (difficulty === 'medium') {
+        // 3 incorrect
+        for (let i = 1; i <= 3; i++) {
+            objects.push({ type: 'fake', img: fakeImgs[Math.floor(Math.random() * fakeImgs.length)], sectorIndex: sectors[i] });
+        }
+    } else if (difficulty === 'hard') {
+        // 7 incorrect
+        for (let i = 1; i < NUM_SECTORS; i++) {
+            objects.push({ type: 'fake', img: fakeImgs[Math.floor(Math.random() * fakeImgs.length)], sectorIndex: sectors[i] });
+        }
+    }
+    return objects;
+}
+
+// Checks if point (x, y) is inside sector sectorIndex
+function isPointInSector(x, y, sectorIndex) {
+    const step = (2 * Math.PI) / NUM_SECTORS;
+    const cx = 50, cy = 50;
+    
+    // Calculate angle from center to point
+    const dx = x - cx;
+    const dy = y - cy;
+    let pointAngle = Math.atan2(dy, dx) + Math.PI / 2;
+    
+    // Normalize angle to [0, 2π]
+    if (pointAngle < 0) pointAngle += 2 * Math.PI;
+    if (pointAngle >= 2 * Math.PI) pointAngle -= 2 * Math.PI;
+    
+    // Sector boundaries
+    const sectorStart = sectorIndex * step;
+    const sectorEnd = (sectorIndex + 1) * step;
+    
+    // Check if point angle is within sector range
+    return pointAngle >= sectorStart && pointAngle < sectorEnd;
+}
+
+// Returns {left, top, transform} for a given sectorIndex (0..NUM_SECTORS-1)
+// isCorrect = true: spawns at exact center
+// isCorrect = false: spawns randomly within sector
+function getPositionFromSector(sectorIndex, isCorrect = true) {
+    const step = (2 * Math.PI) / NUM_SECTORS;
+    const cx = 50, cy = 50;
+
+    // Calculate angle at the CENTER of the sector
+    const angle = (sectorIndex + 0.5) * step - Math.PI / 2;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    let x, y;
+
+    if (isCorrect) {
+        // CORRECT object: Position at exact center of sector - NO random offset
+        x = cx + ZONE_RADIUS * cos;
+        y = cy + ZONE_RADIUS * sin;
+        console.log(`TRUE object in sector ${sectorIndex}: CENTER at (${x.toFixed(1)}%, ${y.toFixed(1)}%)`);
+    } else {
+        // FAKE object: Random position within sector boundaries
+        const zoneSizeX = ZONE_SIZE * 1.5;
+        const zoneSizeY = ZONE_SIZE * 1.5;
+        const zoneCenterX = cx + ZONE_RADIUS * cos;
+        const zoneCenterY = cy + ZONE_RADIUS * sin;
+
+        let attempts = 0;
+        const maxAttempts = 50;
+
+        do {
+            const randomOffsetX = (Math.random() - 0.5) * zoneSizeX;
+            const randomOffsetY = (Math.random() - 0.5) * zoneSizeY;
+
+            x = zoneCenterX + randomOffsetX;
+            y = zoneCenterY + randomOffsetY;
+
+            attempts++;
+
+            if (attempts >= maxAttempts) {
+                x = zoneCenterX;
+                y = zoneCenterY;
+                break;
+            }
+        } while (!isPointInSector(x, y, sectorIndex));
+
+        console.log(`FAKE object in sector ${sectorIndex}: RANDOM at (${x.toFixed(1)}%, ${y.toFixed(1)}%)`);
+    }
+
+    return {
+        left: `${x}%`,
+        top: `${y}%`,
+        transform: 'translate(-50%, -50%)'
+    };
+}
+// Returns true if the sector contains at least one correct object
+function isSectorCorrect(objects, sectorIndex) {
+    return objects.some(obj => obj.sectorIndex === sectorIndex && obj.type === 'correct');
+}
+
 // ============================================================================
 // LOCAL STORAGE FUNCTIONS
 // ============================================================================
@@ -263,7 +319,6 @@ function updateScoreDisplay() {
 
 function updateProgressBar() {
     // Calculate progress: (currentRound - 1) / TOTAL_ROUNDS * 100
-    // We use currentRound - 1 because we want to show progress after completing a round
     const progress = Math.min(100, Math.round(((gameState.currentRound - 1) / TOTAL_ROUNDS) * 100));
     
     if (progressBar) {
@@ -293,28 +348,6 @@ function getRandomCenterObject() {
     // Randomly select one of the center objects
     const objs = ACTIVE_THEME.centerObjects;
     return objs[Math.floor(Math.random() * objs.length)];
-}
-
-function getRandomPeripheralPosition() {
-    // Randomly select one of the 8 peripheral positions
-    return Math.floor(Math.random() * NUM_PERIPHERAL_POSITIONS);
-}
-
-function getPositionCoordinates(position) {
-    // Returns the coordinates for positioning the peripheral object
-    // Position 0-7 correspond to the 8 positions around the center
-    // Using ~90% to keep moon within bounds (instead of 100% which goes outside)
-    const positions = [
-        { top: '5%', left: '50%', transform: 'translate(-50%, -50%)' },      // Top
-        { top: '20%', left: '90%', transform: 'translate(-50%, -50%)' },     // Top Right
-        { top: '50%', left: '90%', transform: 'translate(-50%, -50%)' },      // Right
-        { top: '80%', left: '90%', transform: 'translate(-50%, -50%)' },       // Bottom Right
-        { top: '95%', left: '50%', transform: 'translate(-50%, -50%)' },      // Bottom
-        { top: '80%', left: '10%', transform: 'translate(-50%, -50%)' },       // Bottom Left
-        { top: '50%', left: '10%', transform: 'translate(-50%, -50%)' },      // Left
-        { top: '20%', left: '10%', transform: 'translate(-50%, -50%)' }       // Top Left
-    ];
-    return positions[position];
 }
 
 function resetUI() {
@@ -365,7 +398,6 @@ function displayObjects() {
     // Random center object
     gameState.centerObject = getRandomCenterObject();
 
-    // --- Peripheral object logic by difficulty (sector-index-based) ---
     // Generate peripheral objects for this round
     const peripheralObjects = spawnPeripheralObjects(gameState.selectedDifficulty);
     gameState.peripheralObjectsThisRound = peripheralObjects;
@@ -395,8 +427,6 @@ function displayObjects() {
         });
     }
 
-
-
     // After display time, hide everything
     setTimeout(() => {
         const centerObjectImg = document.getElementById('dd-centerObjectImg');
@@ -414,11 +444,10 @@ function displayObjects() {
         setTimeout(() => {
             gameState.waitingForInput = true;
             if (clickPrompt) clickPrompt.textContent = 'Click the sector where the object appeared';
-        }, 400); // slower appearance
-    }, gameState.displayTime + 200); // slower appearance
+        }, 400);
+    }, gameState.displayTime + 200);
 }
 
-// Helper to position all peripheral objects in sectors
 // Helper to position all peripheral objects in sectors
 function positionPeripheralObjectsInSectors(peripheralObjects) {
     // Remove any previous peripheral images
@@ -435,9 +464,13 @@ function positionPeripheralObjectsInSectors(peripheralObjects) {
         document.getElementById('dd-gameArea').appendChild(container);
     }
     container.innerHTML = '';
-    // Place all peripheral objects strictly by sectorIndex (no random offset)
+
+    console.log('=== Spawning Peripheral Objects ===');
+    // Place all peripheral objects: TRUE at center, FAKE randomly
     peripheralObjects.forEach(obj => {
-        const pos = getPositionFromSector(obj.sectorIndex);
+        console.log(`Object: ${obj.type} (${obj.img.split('/').pop()}) in sector ${obj.sectorIndex}`);
+        const isCorrect = obj.type === 'correct';
+        const pos = getPositionFromSector(obj.sectorIndex, isCorrect);
         const img = document.createElement('img');
         img.src = obj.img;
         img.className = 'moon-visible dd-peripheral-img';
@@ -445,8 +478,8 @@ function positionPeripheralObjectsInSectors(peripheralObjects) {
         img.style.left = pos.left;
         img.style.top = pos.top;
         img.style.transform = pos.transform;
-        img.style.width = '64px';
-        img.style.height = '64px';
+        img.style.width = '48px';
+        img.style.height = '48px';
         img.style.pointerEvents = 'none';
         container.appendChild(img);
     });
@@ -611,7 +644,7 @@ function startGame() {
     document.getElementById('dd-gameArea').classList.remove('hidden');
 
     buildSectors(NUM_SECTORS);
-    
+
     // Reset game state
     gameState.currentRound = 1;
     gameState.totalAttempts = 0;
@@ -693,8 +726,6 @@ function setupGameEventListeners() {
             checkAnswers();
         });
     });
-
-    // Sector clicks are handled in buildSectors function
 }
 
 // ============================================================================
@@ -801,7 +832,6 @@ function setupEventListeners() {
     // Setup game event listeners (choice buttons and peripheral positions)
     setupGameEventListeners();
 }
-
 function applyTheme() {
     // Apply background class
     const gameArea = document.getElementById('dd-gameArea');
@@ -902,7 +932,7 @@ function buildSectors(n = NUM_SECTORS) {
     sectorsGroup.innerHTML = ''; // Clear existing sectors
 
     const cx = 500, cy = 500; // Center of the SVG
-    const outerR = 460; // Outer radius
+    const outerR = 500; // Outer radius
     const step = (2 * Math.PI) / n;
 
     for (let i = 0; i < n; i++) {
@@ -976,5 +1006,8 @@ function positionMoonInSector(sectorIndex) {
     moonImg.classList.remove('moon-hidden');
     moonImg.classList.add('moon-visible');
 }
+window.positionMoonInSector = positionMoonInSector;
+
+
 })(); // End of IIFE
 

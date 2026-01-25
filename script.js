@@ -90,14 +90,14 @@ const THEMES = {
 let ACTIVE_THEME = THEMES.space; // Default theme
 
 // Initial display time in milliseconds (starts at easiest, decreases each round)
-const INITIAL_DISPLAY_TIME = 1200;
+const INITIAL_DISPLAY_TIME = 1100;
 
 // Minimum and maximum display times (in milliseconds)
-const MIN_DISPLAY_TIME = 400;
+const MIN_DISPLAY_TIME = 200;
 const MAX_DISPLAY_TIME = 1000;
 
 // Difficulty adjustment step (how much to increase/decrease time)
-const DIFFICULTY_STEP = 40;
+const DIFFICULTY_STEP = 100;
 
 // Total number of rounds before game over
 const TOTAL_ROUNDS = 10;

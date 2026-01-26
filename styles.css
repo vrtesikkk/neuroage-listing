@@ -718,3 +718,7 @@ body {
 }
 
 
+
+/* Peripheral Legend Visibility */
+.dd-legend-hidden { visibility: hidden !important; }
+.dd-legend-visible { visibility: visible !important; }

@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <title>Double Decision Assessment</title>
+    <title>Speed Training Assessment</title>
 </head>
 <body>
     <div class="background-blur-bg"></div>
-    <!-- DOUBLE DECISION START -->
-    <!-- Double Decision Game -->
+    <!-- SPEED TRAINING START -->
+    <!-- Speed Training Game -->
     <div id="doubleDecision" class="game-container max-w-2xl w-full mx-auto px-4"> <!-- [DD] -->
 
         <!-- Header -->
@@ -18,12 +18,12 @@
             <a href="index.html" class="back-to-menu-btn mb-4" style="display: inline-block; text-decoration: none;">
                 <span class="back-arrow">←</span> Back to Menu
             </a>
-            <h2 class="text-2xl font-bold neuroage-text-primary">Double Decision Assessment</h2>
+            <h2 class="text-2xl font-bold neuroage-text-primary">Speed Training Assessment</h2>
         </div>
         
         <!-- Start Screen -->
         <div id="dd-startScreen" class="neuroage-card rounded-lg p-8 text-center mb-4"> <!-- [DD] -->
-            <h1 class="text-3xl font-bold neuroage-text-primary mb-4">Double Decision Assessment</h1>
+            <h1 class="text-3xl font-bold neuroage-text-primary mb-4">Speed Training Assessment</h1>
             <p class="text-lg text-gray-700 mb-4 font-medium">Test your attention and working memory</p>
             <div class="max-w-xl mx-auto mb-6">
                 <p class="text-sm text-gray-600 leading-relaxed mb-3">
@@ -33,12 +33,64 @@
                     <p class="text-sm text-gray-700">
                         <strong>Instructions:</strong> Watch the center object and the peripheral object that appears around it. After they disappear, choose which object was in the center and click where the peripheral object appeared.<br>
                          </p>
+                         <p class="text-sm text-gray-700 mt-2">
+                            <strong>There are 3 game themes:</strong><br>
+                            Space Theme: UFOs and planets.<br>
+                            Ocean Theme: Dolphins and sharks.<br>
+                            Savanna Theme: Antelopes and other animals.<br>
+                         </p>
                     <p class="text-sm text-gray-700 mt-2">     
                         <strong>Difficulty Levels:</strong><br>
                         Easy Difficulty: There is only one peripheral object.<br>
                         Medium Difficulty: There is one right peripheral object and 3 wrong ones.<br>
-                        Hard Difficulty: There is one right peripheral object and 7 wrong ones.
+                        Hard Difficulty: There is one right peripheral object and 7 wrong ones.<br>
                     </p>
+                    <p class="text-sm text-gray-700 mt-2">
+                        In hard and medium difficulties you will see a decoy and a right object, here are examples of both:
+                    </p>
+                   
+                        <!-- Space Theme Example -->
+                         <p class="text-sm text-gray-700 mt-2 w-full text-center"><strong>Space Theme</strong></p>
+                          <div class="flex justify-center gap-6 mt-3">
+                        <div class="text-center">
+                            <img src="img/phobos.png" alt="Decoy Example" class="mx-auto mb-2 dd-choice-btn-img object-contain">
+                            <p class="text-sm" style="color:#b91c1c;">Decoy Object</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="img/moon.png" alt="Right Example" class="mx-auto mb-2 dd-choice-btn-img object-contain">
+                            <p class="text-sm" style="color:#14532d;">Right Object</p>
+                        </div>
+                    </div>
+                    <!-- Ocean Theme Example -->
+                    <p class="text-sm text-gray-700 mt-2 w-full text-center"><strong>Ocean Theme</strong></p>
+                    <div class="flex justify-center gap-6 mt-3">
+                        <div class="text-center">
+                            <img src="img/dolphin2.png" alt="Decoy Example" class="mx-auto mb-2 dd-choice-btn-img object-contain">
+                            <p class="text-sm" style="color:#b91c1c;">Decoy Object</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="img/dolphin.png" alt="Right Example" class="mx-auto mb-2 dd-choice-btn-img object-contain">
+                            <p class="text-sm" style="color:#14532d;">Right Object</p>
+                        </div>
+                    </div>
+                    <!-- Savanna Theme Example -->
+                    <p class="text-sm text-gray-700 mt-2 w-full text-center"><strong>Savanna Theme</strong></p>
+                    <div class="flex justify-center gap-6 mt-3 mb-2">
+                        <div class="text-center">
+                            <img src="img/antelope.png" alt="Decoy Example" class="mx-auto mb-2 dd-choice-btn-img object-contain">
+                            <p class="text-sm" style="color:#b91c1c;">Decoy Object</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="img/impala.png" alt="Right Example" class="mx-auto mb-2 dd-choice-btn-img object-contain">
+                            <p class="text-sm" style="color:#14532d;">Right Object</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-700 mt-2">
+                        <i><b>Tip:</b>Start with the easy level and move up once you are able to complete it with 10/10 accuracy.
+                        </i>
+                    </p>
+                    
+
                 </div>
             </div>
             <button id="dd-startBtn" class="neuroage-primary hover:neuroage-primary-dark text-white font-semibold py-3 px-8 rounded-lg text-base transition-all duration-200 shadow-md hover:shadow-lg"> <!-- [DD] -->
